@@ -11,6 +11,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScore;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,10 +19,15 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    public string PlayerName;
+
+    //public DataHandler dataHandlerScript;
+
     // Start is called before the first frame update
     void Start()
     {
+        //dataHandlerScript = gameObject.GetComponent<DataHandler>(); //get save method
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -36,6 +42,9 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        DataHandler.Instance.LoadScore();
+        ScoreText.text = DataHandler.Instance.playerName + " Score: 0";
+        BestScore.text = "Best Score: " + DataHandler.Instance.highScorePlayerName + " - " + DataHandler.Instance.highScore;
     }
 
     private void Update()
@@ -65,12 +74,26 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = DataHandler.Instance.playerName + " " + $"Score : {m_Points}";
+
+        //if highscore is beaten
+        //DataHandler.Instance.highScore = 4; //reset high score for testing.
+        if (DataHandler.Instance.highScore < m_Points)
+        {
+            Debug.Log("New high score!");
+            DataHandler.Instance.highScore = m_Points;
+            BestScore.text = "Best Score: " + DataHandler.Instance.playerName + " - " + DataHandler.Instance.highScore;
+            //dataHandlerScript.SaveScore();
+            DataHandler.Instance.SaveScore();
+        }
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        //save game
     }
+
 }
